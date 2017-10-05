@@ -128,42 +128,7 @@ prerender.blacklisted = function(blacklist) {
 
 
 prerender.shouldShowPrerenderedPage = function(req) {
-  var userAgent = req.headers['user-agent']
-    , bufferAgent = req.headers['x-bufferbot']
-    , isRequestingPrerenderedPage = false;
-
-  if(!userAgent) return false;
-  if(req.method != 'GET' && req.method != 'HEAD') return false;
-
-  //if it contains _escaped_fragment_, show prerendered page
-  var parsedQuery = url.parse(req.url, true).query;
-  if(parsedQuery && parsedQuery['_escaped_fragment_'] !== undefined) isRequestingPrerenderedPage = true;
-
-  //if it is a bot...show prerendered page
-  if(prerender.crawlerUserAgents.some(function(crawlerUserAgent){ return userAgent.toLowerCase().indexOf(crawlerUserAgent.toLowerCase()) !== -1;})) isRequestingPrerenderedPage = true;
-
-  //if it is BufferBot...show prerendered page
-  if(bufferAgent) isRequestingPrerenderedPage = true;
-
-  //if it is a bot and is requesting a resource...dont prerender
-  if(prerender.extensionsToIgnore.some(function(extension){return req.url.toLowerCase().indexOf(extension) !== -1;})) return false;
-
-  //if it is a bot and not requesting a resource and is not whitelisted...dont prerender
-  if(Array.isArray(this.whitelist) && this.whitelist.every(function(whitelisted){return (new RegExp(whitelisted)).test(req.url) === false;})) return false;
-
-  //if it is a bot and not requesting a resource and is not blacklisted(url or referer)...dont prerender
-  if(Array.isArray(this.blacklist) && this.blacklist.some(function(blacklisted){
-    var blacklistedUrl = false
-      , blacklistedReferer = false
-      , regex = new RegExp(blacklisted);
-
-    blacklistedUrl = regex.test(req.url) === true;
-    if(req.headers['referer']) blacklistedReferer = regex.test(req.headers['referer']) === true;
-
-    return blacklistedUrl || blacklistedReferer;
-  })) return false;
-
-  return isRequestingPrerenderedPage;
+  return req.header('X-Should-Prerender') === '1';
 };
 
 
