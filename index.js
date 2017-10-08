@@ -128,7 +128,7 @@ prerender.blacklisted = function(blacklist) {
 
 
 prerender.shouldShowPrerenderedPage = function(req) {
-  return req.header('X-Should-Prerender') === '1';
+  return /^prerender_/.test(req.header('X-Custom-Origin'));
 };
 
 
